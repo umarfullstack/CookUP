@@ -2,6 +2,19 @@
   const botToken = (process.env.TG_BOT_TOKEN || '').trim();
   const chatId = (process.env.TG_CHAT_ID || '').trim();
 
+  const requestUrl = (() => {
+    try {
+      return new URL(req.url || '', 'https://local.test');
+    } catch (e) {
+      return null;
+    }
+  })();
+
+  const sendTestParam =
+    (req.query && req.query.send_test) ||
+    (requestUrl && requestUrl.searchParams.get('send_test')) ||
+    '';
+
   async function sendTelegram(text) {
     const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
@@ -13,7 +26,7 @@
   }
 
   if (req.method === 'GET') {
-    if (req.query && req.query.send_test === '1') {
+    if (String(sendTestParam) === '1') {
       if (!botToken || !chatId) {
         return res.status(500).json({
           ok: false,

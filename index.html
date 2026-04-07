@@ -99,6 +99,20 @@
     body.light .card-name{color:#18181b}
     body.light header{border-bottom-color:rgba(0,0,0,0.08)!important}
     body.light nav{border-top-color:rgba(0,0,0,0.08)!important}
+    .toast-notice{
+      background:#1c1c1e;
+      border:1px solid #3f3f46;
+      color:#fff;
+      white-space:nowrap;
+      max-width:88vw;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    body.light .toast-notice{
+      background:#fff;
+      border-color:#d4d4d8;
+      color:#18181b;
+    }
 
     body,header,nav,.food-card,.form-input,.cfg-input{
       transition:background-color 0.3s ease,color 0.3s ease,border-color 0.3s ease;
@@ -541,8 +555,7 @@ document.addEventListener('alpine:init', () => {
        x-transition:leave="transition ease-in duration-200"
        x-transition:leave-start="opacity-100"
        x-transition:leave-end="opacity-0 translate-y-2"
-       class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-2xl text-sm font-semibold shadow-2xl pointer-events-none"
-       style="background:#1c1c1e;border:1px solid #3f3f46;white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis"
+       class="toast-notice fixed bottom-24 left-1/2 -translate-x-1/2 z-[9999] px-5 py-3 rounded-2xl text-sm font-semibold shadow-2xl pointer-events-none"
        x-text="$store.app.toast.msg"></div>
 
   <!-- HEADER -->
@@ -558,7 +571,7 @@ document.addEventListener('alpine:init', () => {
       <!-- Кнопка темы: тёмная → ☀️, светлая → 🌙 оранжевая -->
       <button @click="$store.app.toggleTheme()"
               class="w-9 h-9 rounded-xl flex items-center justify-center"
-              :style="$store.app.theme==='light'?'background:#27272a':'background:#27272a'">
+              :style="$store.app.theme==='light'?'background:#f4f4f5;border:1px solid #d4d4d8':'background:#27272a'">
         <!-- Тёмная тема → солнце -->
         <svg x-show="$store.app.theme==='dark'" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
@@ -1075,7 +1088,8 @@ document.addEventListener('alpine:init', () => {
           <div class="flex items-center gap-3 py-3 border-b" style="border-color:#27272a">
             <div class="w-12 h-12 rounded-xl overflow-hidden flex-shrink-0" style="background:#27272a">
               <img :src="item.img" :alt="item.name" style="width:100%;height:100%;object-fit:cover"
-                   onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-size:1.5rem;display:flex;align-items:center;justify-content:center;height:100%\'>'+item.emoji+'</span>'" />
+                   :data-emoji="item.emoji"
+                   onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'font-size:1.5rem;display:flex;align-items:center;justify-content:center;height:100%\'>' + (this.dataset.emoji || '🍽') + '</span>'" />
             </div>
             <div class="flex-1 min-w-0">
               <p class="font-semibold text-sm truncate" x-text="item.name"></p>

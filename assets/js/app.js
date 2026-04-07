@@ -224,10 +224,36 @@
 
     _extractCoordinates(address){
       if(typeof address!=='string') return null;
-      const m=address.trim().match(/^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/);
-      if(!m) return null;
-      const lat=parseFloat(m[1]);
-      const lng=parseFloat(m[2]);
+      const raw=address.trim();
+      if(!raw) return null;
+
+      let latStr='', lngStr='';
+
+      // 1) "41.33056, 69.26278" or "41.33056 69.26278"
+      const standard=raw.match(/^\s*(-?\d+(?:[.,]\d+)?)\s*[, ]\s*(-?\d+(?:[.,]\d+)?)\s*$/);
+      if(standard){
+        latStr=standard[1];
+        lngStr=standard[2];
+      } else {
+        // 2) "41,33056 69,26278" or "41,33056;69,26278"
+        const bySep=raw.split(/[;\s]+/).filter(Boolean);
+        if(bySep.length===2){
+          latStr=bySep[0];
+          lngStr=bySep[1];
+        } else {
+          // 3) "41,33056,69,26278"
+          const parts=raw.split(',').map(s=>s.trim()).filter(Boolean);
+          if(parts.length===4){
+            latStr=`${parts[0]},${parts[1]}`;
+            lngStr=`${parts[2]},${parts[3]}`;
+          } else {
+            return null;
+          }
+        }
+      }
+
+      const lat=parseFloat(latStr.replace(',','.'));
+      const lng=parseFloat(lngStr.replace(',','.'));
       if(Number.isNaN(lat)||Number.isNaN(lng)) return null;
       if(lat<-90||lat>90||lng<-180||lng>180) return null;
       return {lat,lng};

@@ -222,6 +222,42 @@
       );
     },
 
+    _extractCoordinates(address){
+      if(typeof address!=='string') return null;
+      const m=address.trim().match(/^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/);
+      if(!m) return null;
+      const lat=parseFloat(m[1]);
+      const lng=parseFloat(m[2]);
+      if(Number.isNaN(lat)||Number.isNaN(lng)) return null;
+      if(lat<-90||lat>90||lng<-180||lng>180) return null;
+      return {lat,lng};
+    },
+
+    async _geocodeAddress(address){
+      try{
+        const q=encodeURIComponent(address.trim());
+        const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${q}`;
+        const res=await fetch(url,{headers:{'Accept':'application/json'}});
+        if(!res.ok) return null;
+        const data=await res.json();
+        if(!Array.isArray(data)||!data.length) return null;
+        const lat=parseFloat(data[0].lat);
+        const lng=parseFloat(data[0].lon);
+        if(Number.isNaN(lat)||Number.isNaN(lng)) return null;
+        return {lat,lng};
+      }catch(e){
+        return null;
+      }
+    },
+
+    async _resolveDeliveryCoords(address){
+      const byCoords=this._extractCoordinates(address);
+      if(byCoords) return byCoords;
+      const byGeocode=await this._geocodeAddress(address);
+      if(byGeocode) return byGeocode;
+      return null;
+    },
+
     async _sendToSupabase(order){
       if(!this.config.supabaseUrl||!this.config.supabaseKey) return null;
       try{
@@ -289,7 +325,13 @@
       if(!this.form.address.trim()) this.formErrors.address='Введите адрес';
       if(!this.cart.length)         this.formErrors.cart='Корзина пуста';
       if(Object.keys(this.formErrors).length) return;
-      const order={id:Date.now(),createdAt:new Date().toISOString(),customer:{...this.form,email:this.currentUser?.email||''},items:[...this.cart],total:parseFloat(this.cartTotal),status:'cooking',deliveryLat:41.2995+(Math.random()-.5)*.018,deliveryLng:69.2401+(Math.random()-.5)*.018};
+      const resolvedCoords=await this._resolveDeliveryCoords(this.form.address);
+      const fallbackCoords={lat:41.2995+(Math.random()-.5)*.018,lng:69.2401+(Math.random()-.5)*.018};
+      const delivery=resolvedCoords||fallbackCoords;
+      if(!resolvedCoords){
+        this.showToast('⚠️ Адрес не распознан, использую примерную точку');
+      }
+      const order={id:Date.now(),createdAt:new Date().toISOString(),customer:{...this.form,email:this.currentUser?.email||''},items:[...this.cart],total:parseFloat(this.cartTotal),status:'cooking',deliveryLat:delivery.lat,deliveryLng:delivery.lng};
       console.log('📦 ORDER JSON:',JSON.stringify(order,null,2));
       await Promise.all([this._sendToSupabase(order),this._sendToTelegram(order)]);
       this.orders.unshift(order);

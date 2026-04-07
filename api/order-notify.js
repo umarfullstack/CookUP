@@ -12,8 +12,8 @@
     return res.status(405).json({ ok: false, error: 'Method Not Allowed' });
   }
 
-  const botToken = process.env.TG_BOT_TOKEN;
-  const chatId = process.env.TG_CHAT_ID;
+  const botToken = (process.env.TG_BOT_TOKEN || '').trim();
+  const chatId = (process.env.TG_CHAT_ID || '').trim();
 
   if (!botToken || !chatId) {
     return res.status(500).json({

@@ -260,10 +260,19 @@
     },
 
     async _geocodeAddress(address){
+      let ctrl=null;
+      let timeoutId=null;
       try{
         const q=encodeURIComponent(address.trim());
         const url=`https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${q}`;
-        const res=await fetch(url,{headers:{'Accept':'application/json'}});
+        if(typeof AbortController!=='undefined'){
+          ctrl=new AbortController();
+          timeoutId=setTimeout(()=>ctrl.abort(),2500);
+        }
+        const res=await fetch(url,{
+          headers:{'Accept':'application/json'},
+          signal:ctrl?ctrl.signal:undefined
+        });
         if(!res.ok) return null;
         const data=await res.json();
         if(!Array.isArray(data)||!data.length) return null;
@@ -273,6 +282,8 @@
         return {lat,lng};
       }catch(e){
         return null;
+      } finally {
+        if(timeoutId) clearTimeout(timeoutId);
       }
     },
 
@@ -309,7 +320,8 @@
         const d=await res.json().catch(()=>({ok:false,error:'invalid_json'}));
         if(!res.ok||!d.ok){
           console.error('❌ TG notify failed:',d);
-          this.showToast('❌ Telegram: не удалось отправить');
+          const details=d?.telegram?.description||d?.error||'не удалось отправить';
+          this.showToast(`❌ Telegram: ${details}`);
           return d;
         }
         console.log('✅ Telegram notify OK');
@@ -331,7 +343,10 @@
         });
         const d=await res.json().catch(()=>({ok:false,error:'invalid_json'}));
         if(d&&d.ok) this.showToast('✅ Тест отправлен! Проверь чат.');
-        else this.showToast('❌ Тест не отправился');
+        else{
+          const details=d?.telegram?.description||d?.error||'не отправился';
+          this.showToast(`❌ Тест Telegram: ${details}`);
+        }
       }catch(e){
         this.showToast('❌ Тест не отправился');
       }

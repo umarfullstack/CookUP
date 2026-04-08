@@ -171,6 +171,23 @@
       this.$nextTick(()=>lucide.createIcons());
     },
 
+    openProfile(){
+      if(this.role==='guest'){
+        this.openAuth('login');
+        return;
+      }
+      if(this.role==='admin'){
+        this.showAdmin=true;
+        this.showSettings=false;
+        this.page='menu';
+      } else {
+        this.showAdmin=false;
+        this.showSettings=false;
+        this.page='user_profile';
+      }
+      this.$nextTick(()=>lucide.createIcons());
+    },
+
     _saveCart()  { localStorage.setItem('qb_cart',  JSON.stringify(this.cart)); },
     _saveConfig(){ localStorage.setItem('qb_config',JSON.stringify(this.config)); },
 

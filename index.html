@@ -137,7 +137,7 @@
       </button>
 
       <!-- Кнопка профиля/войти -->
-      <button @click="$store.app.role==='guest'?$store.app.openAuth('login'):(($store.app.page=$store.app.role==='admin'?'admin_profile':'user_profile'),$nextTick(()=>lucide.createIcons()))"
+      <button @click="$store.app.openProfile()"
               class="w-9 h-9 rounded-xl flex items-center justify-center transition relative"
               :style="['user','admin'].includes($store.app.role)?'background:#F59E0B':'background:#27272a'">
         <i data-lucide="user" class="w-4 h-4" :style="$store.app.role!=='guest'?'color:#000':'color:#a1a1aa'"></i>

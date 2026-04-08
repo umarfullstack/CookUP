@@ -62,11 +62,7 @@
     return res.status(200).json({ ok: true, ignored: true, reason: 'Not /start or web_app_data' });
   }
 
-  const greeting = [
-    `Привет, ${displayName}!`,
-    'Добро пожаловать в Food Delivery Admin.',
-    'Я на связи и готов отправлять уведомления о заказах.'
-  ].join('\n');
+  const greeting = `Привет ${displayName} если ты хочешь поесть нажми кнопку Menu слева снизу от меня`;
 
   try {
     await sendMessage(chatId, greeting);

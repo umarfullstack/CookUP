@@ -125,7 +125,7 @@
       <!-- Кнопка темы: тёмная → ☀️, светлая → 🌙 оранжевая -->
       <button @click="$store.app.toggleTheme()"
               class="w-9 h-9 rounded-xl flex items-center justify-center"
-              :style="$store.app.theme==='light'?'background:#f4f4f5;border:1px solid #d4d4d8':'background:#27272a'">
+              :style="$store.app.theme==='light'?'background:#000;border:1px solid #27272a':'background:#27272a'">
         <!-- Тёмная тема → солнце -->
         <svg x-show="$store.app.theme==='dark'" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>

@@ -1,4 +1,9 @@
-﻿module.exports = async function handler(req, res) {
+﻿globalThis.__qbNotifyDebug = globalThis.__qbNotifyDebug || {
+  updatedAt: null,
+  lastEvent: null
+};
+
+module.exports = async function handler(req, res) {
   const botToken = (process.env.TG_BOT_TOKEN || '').trim();
   const chatId = (process.env.TG_CHAT_ID || '').trim();
 
@@ -15,6 +20,11 @@
     (requestUrl && requestUrl.searchParams.get('send_test')) ||
     '';
 
+  const debugParam =
+    (req.query && req.query.debug) ||
+    (requestUrl && requestUrl.searchParams.get('debug')) ||
+    '';
+
   async function sendTelegram(text) {
     const tgRes = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: 'POST',
@@ -26,6 +36,10 @@
   }
 
   if (req.method === 'GET') {
+    if (String(debugParam) === '1') {
+      return res.status(200).json({ ok: true, debug: globalThis.__qbNotifyDebug });
+    }
+
     if (String(sendTestParam) === '1') {
       if (!botToken || !chatId) {
         return res.status(500).json({
@@ -37,11 +51,24 @@
       try {
         const { tgRes, tgData } = await sendTelegram('✅ QuickBite direct server test');
         if (!tgRes.ok || tgData.ok === false) {
+          globalThis.__qbNotifyDebug = {
+            updatedAt: new Date().toISOString(),
+            lastEvent: { ok: false, type: 'direct_test', status: tgRes.status, telegram: tgData }
+          };
           return res.status(500).json({ ok: false, telegram: tgData });
         }
+        globalThis.__qbNotifyDebug = {
+          updatedAt: new Date().toISOString(),
+          lastEvent: { ok: true, type: 'direct_test', status: tgRes.status, telegram: tgData }
+        };
         return res.status(200).json({ ok: true, direct_test: true, telegram: tgData });
       } catch (error) {
-        return res.status(500).json({ ok: false, error: 'direct_test_send_failed', details: String(error && error.message ? error.message : error) });
+        const details = String(error && error.message ? error.message : error);
+        globalThis.__qbNotifyDebug = {
+          updatedAt: new Date().toISOString(),
+          lastEvent: { ok: false, type: 'direct_test', error: 'direct_test_send_failed', details }
+        };
+        return res.status(500).json({ ok: false, error: 'direct_test_send_failed', details });
       }
     }
 
@@ -107,12 +134,25 @@
   try {
     const { tgRes, tgData } = await sendTelegram(text);
     if (!tgRes.ok || tgData.ok === false) {
+      globalThis.__qbNotifyDebug = {
+        updatedAt: new Date().toISOString(),
+        lastEvent: { ok: false, type, status: tgRes.status, telegram: tgData }
+      };
       return res.status(500).json({ ok: false, telegram: tgData });
     }
 
+    globalThis.__qbNotifyDebug = {
+      updatedAt: new Date().toISOString(),
+      lastEvent: { ok: true, type, status: tgRes.status, telegram: tgData }
+    };
     return res.status(200).json({ ok: true, type });
   } catch (error) {
     console.error('order-notify send failed:', error);
-    return res.status(500).json({ ok: false, error: 'send_failed', details: String(error && error.message ? error.message : error) });
+    const details = String(error && error.message ? error.message : error);
+    globalThis.__qbNotifyDebug = {
+      updatedAt: new Date().toISOString(),
+      lastEvent: { ok: false, type, error: 'send_failed', details }
+    };
+    return res.status(500).json({ ok: false, error: 'send_failed', details });
   }
 };

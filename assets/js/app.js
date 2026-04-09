@@ -77,8 +77,8 @@
 
     async _sendAutoWelcomeOnce(){
       try{
-        const key='qb_auto_welcome_sent_v1';
-        if(localStorage.getItem(key)==='1') return;
+        const key='qb_auto_welcome_sent_session_v2';
+        if(sessionStorage.getItem(key)==='1') return;
         const payload={
           type:'welcome_auto',
           client:{
@@ -92,7 +92,7 @@
           headers:{'Content-Type':'application/json'},
           body:JSON.stringify(payload)
         });
-        if(res.ok) localStorage.setItem(key,'1');
+        if(res.ok) sessionStorage.setItem(key,'1');
       }catch(e){}
     },
 

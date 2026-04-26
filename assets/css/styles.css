@@ -65,8 +65,7 @@
     .qty-btn.plus{background:var(--amber);color:#000}
     .qty-btn.plus:hover{background:var(--amber-dark)}
 
-    #tracking-map{height:280px;border-radius:18px;border:1px solid var(--z700)}
-    .leaflet-container{background:var(--z900)}
+    select option{background:var(--z800);color:#fff}
 
     .status-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:99px;font-size:11px;font-weight:600}
     .s-new{background:rgba(245,158,11,.15);color:#F59E0B}

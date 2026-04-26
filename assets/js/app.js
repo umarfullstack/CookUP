@@ -37,14 +37,21 @@ document.addEventListener('alpine:init', () => {
 
     cart: [],
 
+    _autoTheme() {
+      const h = new Date().getHours();
+      // 07:00 - 20:00 kunduzi → light, qolgan vaqt → dark
+      return (h >= 7 && h < 20) ? 'light' : 'dark';
+    },
+
     init() {
       try {
         const c = localStorage.getItem('cu_cart');   if (c) this.cart = JSON.parse(c);
         const o = localStorage.getItem('cu_orders'); if (o) this.orders = JSON.parse(o);
-        const t = localStorage.getItem('cu_theme');  if (t) this.theme = t;
         const m = localStorage.getItem('cu_menu');   if (m) this.todayMenu = JSON.parse(m);
         const p = localStorage.getItem('cu_products'); if (p) this.products = JSON.parse(p);
       } catch (e) {}
+      // Har doim vaqtga qarab tema — localStorage saqlanmaydi
+      this.theme = this._autoTheme();
       this._applyTheme(this.theme);
       const savedRole = localStorage.getItem('cu_role');
       const savedUser = localStorage.getItem('cu_user');
@@ -83,7 +90,6 @@ document.addEventListener('alpine:init', () => {
 
     toggleTheme() {
       this.theme = this.theme === 'dark' ? 'light' : 'dark';
-      localStorage.setItem('cu_theme', this.theme);
       this._applyTheme(this.theme);
       this.$nextTick(() => lucide.createIcons());
     },

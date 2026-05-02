@@ -434,13 +434,14 @@ module.exports = async function handler(req, res) {
 
     const conv = await getConv();
 
+    // /start va /help har doim conv ni bekor qilib admin panelni ko'rsatadi
+    if (conv && (isCmd(msgText, '/start') || isCmd(msgText, '/help') || isCmd(msgText, '/cancel'))) {
+      await clearConv();
+      await sendMsg(chatId, '👑 <b>Admin boshqaruv paneli</b>', { reply_markup: adminKeyboard() });
+      return res.status(200).json({ ok: true, type: 'conv_cancel' });
+    }
+
     if (conv) {
-      // /cancel
-      if (msgText === '/cancel') {
-        await clearConv();
-        await sendMsg(chatId, '❌ Bekor qilindi.', { reply_markup: adminKeyboard() });
-        return res.status(200).json({ ok: true, type: 'conv_cancel' });
-      }
 
       // Rasm kutilmoqda
       if (conv.step === 'photo') {
